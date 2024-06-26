@@ -10,3 +10,13 @@ window.localStorageManager = {
         localStorage.removeItem(key);
     }
 };
+
+//culture to set currency
+window.blazorCulture = {
+    get: function () {
+        return localStorage['BlazorCulture'];
+    },
+    set: function (value) {
+        localStorage['BlazorCulture'] = value;
+    }
+};
