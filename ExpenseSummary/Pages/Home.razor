@@ -1,0 +1,156 @@
+﻿@page "/"
+@using System.Text.Json
+@inject IJSRuntime JSRuntime
+
+<h1 class="text-center mb-4">Budget App</h1>
+
+<div class="container-fluid">
+	<div class="d-flex justify-content-center">
+	<div>
+		<label>Name:</label>
+		<input @bind="newItem.Name" />
+	</div>
+	<div>
+		<label>Amount:</label>
+		<input type="number" @bind="newItem.Amount" />
+	</div>
+	<div>
+		<label>Frequency:</label>
+		<select @bind="newItem.Frequency">
+			<option value="Frequency.Daily">Daily</option>
+			<option value="Frequency.Weekly">Weekly</option>
+			<option value="Frequency.Monthly">Monthly</option>
+			<option value="Frequency.Quarterly">Quarterly</option>
+			<option value="Frequency.Annually">Annually</option>
+		</select>
+	</div>
+	<div>
+		<button @onclick="AddBudgetItem">Add Item</button>
+	</div>
+	</div>
+</div>
+<h4>Budget Items</h4>
+<table>
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Per Period Amount</th>
+			<th>Frequency</th>
+			<th>Weekly Amount</th>
+			<th>Annual Amount</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in budgetItems)
+		{
+			<tr>
+				<td>@item.Name</td>
+				<td>@item.PerPeriodAmount.ToString("C")</td>
+				<td>@item.Frequency</td>
+				<td>@item.WeeklyAmount.ToString("C")</td>
+				<td>@item.AnnualAmount.ToString("C")</td>
+				<td>
+					<button @onclick="(() => RemoveBudgetItem(item))">Remove</button>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+@code {
+	private List<BudgetItem> budgetItems = new();
+	private BudgetItem newItem = new();
+
+	public class BudgetItem
+	{
+		public string Name { get; set; }
+		public decimal Amount { get; set; }
+		public Frequency Frequency { get; set; } // Daily, Weekly, Monthly, Quarterly, Annually
+		public decimal PerPeriodAmount { get; set; } // Amount per specified period
+		public decimal DailyAmount { get; set; } // Amount per day
+		public decimal WeeklyAmount { get; set; } // Amount per week
+		public decimal AnnualAmount { get; set; } // Amount per year
+	}
+
+	public enum Frequency
+	{
+		Daily,
+		Weekly,
+		Monthly,
+		Quarterly,
+		Annually
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadBudgetItems();
+		CalculateAmounts();
+	}
+
+	private async Task LoadBudgetItems()
+	{
+		var itemsJson = await JSRuntime.InvokeAsync<string>("localStorageManager.getItem", "budgetItems");
+		if (!string.IsNullOrEmpty(itemsJson))
+		{
+			budgetItems = JsonSerializer.Deserialize<List<BudgetItem>>(itemsJson);
+		}
+	}
+
+	private async Task SaveBudgetItems()
+	{
+		var itemsJson = JsonSerializer.Serialize(budgetItems);
+		await JSRuntime.InvokeVoidAsync("localStorageManager.setItem", "budgetItems", itemsJson);
+	}
+
+	private void AddBudgetItem()
+	{
+		budgetItems.Add(new BudgetItem
+			{
+				Name = newItem.Name,
+				Amount = newItem.Amount,
+				Frequency = newItem.Frequency,
+				PerPeriodAmount = newItem.Amount // Initially set PerPeriodAmount to the input amount
+			});
+		CalculateAmounts();
+		SaveBudgetItems();
+		newItem = new BudgetItem(); // Reset the new item form
+	}
+
+	private void RemoveBudgetItem(BudgetItem item)
+	{
+		budgetItems.Remove(item);
+		CalculateAmounts();
+		SaveBudgetItems();
+	}
+
+	private void CalculateAmounts()
+	{
+		foreach (var item in budgetItems)
+		{
+			switch (item.Frequency)
+			{
+				case Frequency.Daily:
+					item.DailyAmount = item.PerPeriodAmount;
+					break;
+				case Frequency.Weekly:
+					item.DailyAmount = item.PerPeriodAmount / 7;
+					break;
+				case Frequency.Monthly:
+					item.DailyAmount = item.PerPeriodAmount / 30.4375m; // Average days in a month
+					break;
+				case Frequency.Quarterly:
+					item.DailyAmount = item.PerPeriodAmount / 91.3125m; // Average days in a quarter
+					break;
+				case Frequency.Annually:
+					item.DailyAmount = item.PerPeriodAmount / 365.25m; // Average days in a year
+					break;
+				default:
+					item.DailyAmount = item.PerPeriodAmount;
+					break;
+			}
+			item.WeeklyAmount = item.DailyAmount * 7;
+			item.AnnualAmount = item.DailyAmount * 365.25m; // Average days in a year
+		}
+	}
+}
