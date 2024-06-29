@@ -6,223 +6,315 @@
 <h1 class="text-center mb-4">Budget App</h1>
 
 <div class="container">
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="">
-                <label for="name">Name:</label>
-                <input id="name" class="form-control" @bind="newItem.Name" />
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="">
-                <label for="amount">Amount:</label>
-                <input id="amount" type="number" class="form-control" @bind="newItem.Amount" />
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="">
-                <label for="frequency">Frequency:</label>
-                <select id="frequency" class="form-select" @bind="newItem.Frequency">
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Quarterly">Quarterly</option>
-                    <option value="Annually">Annually</option>
-                </select>
-            </div>
-        </div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-12 text-center">
-            <button class="btn btn-primary" @onclick="AddBudgetItem">Add Item</button>
-        </div>
-    </div>
+	<div class="row mb-4">
+		<div class="col-md-4">
+			<div class="">
+				<label for="name">Name:</label>
+				<input id="name" class="form-control" @bind="newItem.Name" />
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="">
+				<label for="amount">Amount:</label>
+				<input id="amount" type="number" class="form-control" @bind="newItem.Amount" />
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="">
+				<label for="frequency">Frequency:</label>
+				<select id="frequency" class="form-select" @bind="newItem.Frequency">
+					<option value="Daily">Daily</option>
+					<option value="Weekly">Weekly</option>
+					<option value="Monthly">Monthly</option>
+					<option value="Quarterly">Quarterly</option>
+					<option value="Annually">Annually</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="row mb-4">
+		<div class="col-md-12 text-center">
+			<button class="btn btn-primary" @onclick="AddBudgetItem">Add Item</button>
+		</div>
+	</div>
 
-    <h4>Budget Items</h4>
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Per Period Amount</th>
-                <th>Frequency</th>
-                <th>Calculation Frequency</th>
-                <th>@dynamicHeaderLabel Amount</th>
-                <th>Annual Amount</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in budgetItems)
-            {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>@item.PerPeriodAmount.ToString("C2", new CultureInfo("en-AU"))</td>
-                    <td>@item.Frequency</td>
-                    <td>
-                        <select @onchange="(e => ChangeCalculationFrequency(item, e.Value.ToString()))">
-                            <option value="@CalculationFrequency.Daily">Daily</option>
-                            <option value="@CalculationFrequency.Weekly">Weekly</option>
-                            <option value="@CalculationFrequency.Monthly">Monthly</option>
-                            <option value="@CalculationFrequency.Quarterly">Quarterly</option>
-                            <option value="@CalculationFrequency.Annually">Annually</option>
-                        </select>
-                    </td>
-                    <td>@item.DynamicAmount.ToString("C2", new CultureInfo("en-AU"))</td>
-                    <td>@item.AnnualAmount.ToString("C2", new CultureInfo("en-AU"))</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" @onclick="(() => RemoveBudgetItem(item))">Remove</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+	<h4>Budget Items</h4>
+	<table class="table table-striped table-bordered">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Per Period Amount</th>
+				<th>Frequency</th>
+				<th>Calculation Frequency</th>
+				<th>@dynamicHeaderLabel Amount</th>
+				<th>Annual Amount</th>
+				<th>Actions</th>
+			</tr>
+			<tr>
+				<th></th>
+				<th></th>
+				<th></th>
+				<th>
+				<td>
+						<select id="globalFrequency" class="form-select" @onchange="ChangeGlobalCalculationFrequency">
+					<option value="Daily">Daily</option>
+					<option value="Weekly">Weekly</option>
+					<option value="Monthly">Monthly</option>
+					<option value="Quarterly">Quarterly</option>
+					<option value="Annually">Annually</option>
+					</select>
+				</td>
+				</th>
+				<th></th>
+				<th></th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var item in budgetItems)
+			{
+				<tr>
+					<td>@item.Name</td>
+					<td>@item.PerPeriodAmount.ToString("C2", new CultureInfo("en-AU"))</td>
+					<td>@item.Frequency</td>
+					<td>
+						@item.CalculationFrequency
+
+						@* 
+						This created a bug that would allow each item to have its own CalculationFrequency which made the running
+						totals have inaccurate data. I found it quite cool though just out of scope. Prehaps a feature to build on later.
+						
+						<select @onchange="(e => ChangeCalculationFrequency(item, e.Value.ToString()))">
+							<option value="@CalculationFrequency.Daily">Daily</option>
+							<option value="@CalculationFrequency.Weekly">Weekly</option>
+							<option value="@CalculationFrequency.Monthly">Monthly</option>
+							<option value="@CalculationFrequency.Quarterly">Quarterly</option>
+							<option value="@CalculationFrequency.Annually">Annually</option>
+						</select>
+						 *@
+
+					</td>
+					<td>@item.DynamicAmount.ToString("C2", new CultureInfo("en-AU"))</td>
+					<td>@item.AnnualAmount.ToString("C2", new CultureInfo("en-AU"))</td>
+					<td>
+						<button class="btn btn-danger btn-sm" @onclick="(() => RemoveBudgetItem(item))">Remove</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+	<MudDivider />
+	<div class="container">
+		<div class="row text-center">
+			<div class="col-md-6">
+				<div class="sticky-bottom pt-4">
+					<h5>@dynamicHeaderLabel Amount Total</h5>
+					@{
+						decimal dynamicTotal = 0;
+						foreach (var item in budgetItems)
+						{
+							dynamicTotal = item.DynamicAmount + dynamicTotal;
+						}
+					}
+					<p>@dynamicTotal.ToString("C2", new CultureInfo("en-AU"))</p>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="sticky-bottom pt-4">
+					<h5>Annual Amount Total</h5>
+					@{
+						decimal annualTotal = 0;
+						foreach (var item in budgetItems)
+						{
+
+							annualTotal = item.AnnualAmount + annualTotal;
+
+						}
+
+					}
+					<p>@annualTotal.ToString("C2", new CultureInfo("en-AU"))</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row justify-content-between">
+		<MudButton>Open File</MudButton>
+		<MudButton>Save File</MudButton>
+	</div>
+
 </div>
 
 @code {
-    private List<BudgetItem> budgetItems = new();
-    private BudgetItem newItem = new();
-    private string dynamicHeaderLabel = "";
+	private List<BudgetItem> budgetItems = new();
+	private BudgetItem newItem = new();
+	private string dynamicHeaderLabel = "";
+	private string globalCalculationFrequency = "Weekly";
 
-    public class BudgetItem
-    {
-        public string Name { get; set; }
-        public decimal Amount { get; set; }
-        public Frequency Frequency { get; set; } 
-        public CalculationFrequency CalculationFrequency { get; set; }
-        public decimal PerPeriodAmount { get; set; } 
-        public decimal DailyAmount { get; set; } 
-        public decimal DynamicAmount { get; set; } 
-        public decimal AnnualAmount { get; set; } 
-    }
+	public class BudgetItem
+	{
+		public string Name { get; set; }
+		public decimal Amount { get; set; }
+		public Frequency Frequency { get; set; }
+		public CalculationFrequency CalculationFrequency { get; set; }
+		public decimal PerPeriodAmount { get; set; }
+		public decimal DailyAmount { get; set; }
+		public decimal DynamicAmount { get; set; }
+		public decimal AnnualAmount { get; set; }
 
-    public enum Frequency
-    {
-        Daily,
-        Weekly,
-        Monthly,
-        Quarterly,
-        Annually
-    }
+	}
 
-    public enum CalculationFrequency
-    {
-        Daily,
-        Weekly,
-        Monthly,
-        Quarterly,
-        Annually
-    }
+	public enum Frequency
+	{
+		Daily,
+		Weekly,
+		Monthly,
+		Quarterly,
+		Annually
+	}
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadBudgetItems();
-        CalculateAmounts();
-    }
+	public enum CalculationFrequency
+	{
+		Daily,
+		Weekly,
+		Monthly,
+		Quarterly,
+		Annually
+	}
 
-    private async Task LoadBudgetItems()
-    {
-        var itemsJson = await JSRuntime.InvokeAsync<string>("localStorageManager.getItem", "budgetItems");
-        if (!string.IsNullOrEmpty(itemsJson))
-        {
-            budgetItems = JsonSerializer.Deserialize<List<BudgetItem>>(itemsJson);
-        }
-    }
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadBudgetItems();
+		CalculateAmounts();
+	}
 
-    private async Task SaveBudgetItems()
-    {
-        var itemsJson = JsonSerializer.Serialize(budgetItems);
-        await JSRuntime.InvokeVoidAsync("localStorageManager.setItem", "budgetItems", itemsJson);
-    }
+	
 
-    private void AddBudgetItem()
-    {
-        budgetItems.Add(new BudgetItem
-            {
-                Name = newItem.Name,
-                Amount = newItem.Amount,
-                Frequency = newItem.Frequency,
-                PerPeriodAmount = newItem.Amount,
-                CalculationFrequency = CalculationFrequency.Daily
-            });
-        CalculateAmounts();
-        SaveBudgetItems();
-        newItem = new BudgetItem();
-    }
+	private async Task LoadBudgetItems()
+	{
+		var itemsJson = await JSRuntime.InvokeAsync<string>("localStorageManager.getItem", "budgetItems");
+		if (!string.IsNullOrEmpty(itemsJson))
+		{
+			budgetItems = JsonSerializer.Deserialize<List<BudgetItem>>(itemsJson);
+		}
+	}
 
-    private void RemoveBudgetItem(BudgetItem item)
-    {
-        budgetItems.Remove(item);
-        CalculateAmounts();
-        SaveBudgetItems();
-    }
+	private async Task SaveBudgetItems()
+	{
+		var itemsJson = JsonSerializer.Serialize(budgetItems);
+		await JSRuntime.InvokeVoidAsync("localStorageManager.setItem", "budgetItems", itemsJson);
+	}
 
-    private void CalculateAmounts()
-    {
-        foreach (var item in budgetItems)
-        {
-            decimal dailyAmount = ConvertToDailyAmount(item.PerPeriodAmount, item.Frequency);
+	private void AddBudgetItem()
+	{
+		budgetItems.Add(new BudgetItem
+			{
+				Name = newItem.Name,
+				Amount = newItem.Amount,
+				Frequency = newItem.Frequency,
+				PerPeriodAmount = newItem.Amount,
+				CalculationFrequency = CalculationFrequency.Daily
+			});
+		CalculateAmounts();
+		SaveBudgetItems();
+		newItem = new BudgetItem();
+	}
 
-            
-            item.DailyAmount = dailyAmount;
-            item.DynamicAmount = dailyAmount * 7; 
-            item.AnnualAmount = dailyAmount * 365.25m;
+	private void RemoveBudgetItem(BudgetItem item)
+	{
+		budgetItems.Remove(item);
+		CalculateAmounts();
+		SaveBudgetItems();
+	}
 
-            
-            RecalculateAmountsBasedOnCalculationFrequency(item);
-        }
-    }
+	private void CalculateAmounts()
+	{
+		foreach (var item in budgetItems)
+		{
+			decimal dailyAmount = ConvertToDailyAmount(item.PerPeriodAmount, item.Frequency);
 
-    private decimal ConvertToDailyAmount(decimal amount, Frequency frequency)
-    {
-        return frequency switch
-        {
-            Frequency.Daily => amount,
-            Frequency.Weekly => amount / 7,
-            Frequency.Monthly => amount / 30.4375m,
-            Frequency.Quarterly => amount / 91.3125m,
-            Frequency.Annually => amount / 365.25m, // Includes leap year
-            _ => amount,
-        };
-    }
 
-    private void ChangeCalculationFrequency(BudgetItem item, string selectedFrequency)
-    {
-        if (Enum.TryParse(selectedFrequency, out CalculationFrequency frequency))
-        {
-            item.CalculationFrequency = frequency;
-            dynamicHeaderLabel = frequency.ToString();
-            RecalculateAmountsBasedOnCalculationFrequency(item);
-        }
-    }
+			item.DailyAmount = dailyAmount;
+			item.DynamicAmount = dailyAmount * 7;
+			item.AnnualAmount = dailyAmount * 365.25m;
 
-    private void RecalculateAmountsBasedOnCalculationFrequency(BudgetItem item)
-    {
-        switch (item.CalculationFrequency)
-        {
-            case CalculationFrequency.Daily:
-                item.DynamicAmount = item.DailyAmount;
-                item.AnnualAmount = item.DailyAmount * 365.25m;
-                break;
-            case CalculationFrequency.Weekly:
-                item.DynamicAmount = item.DailyAmount * 7;
-                item.AnnualAmount = (item.DailyAmount * 7) * 52.1786m;
-                break;
-            case CalculationFrequency.Monthly:
-                item.DynamicAmount = (item.DailyAmount * 30.4375m);
-                item.AnnualAmount = item.DailyAmount * 365.25m;
-                break;
-            case CalculationFrequency.Quarterly:
-                item.DynamicAmount = (item.DailyAmount * 91.3125m);
-                item.AnnualAmount = item.DailyAmount * 365.25m;
-                break;
-            case CalculationFrequency.Annually:
-                item.DynamicAmount = (item.DailyAmount * 365.25m);
-                item.AnnualAmount = item.DailyAmount * 365.25m;
-                break;
-            default:
-                item.DynamicAmount = item.DailyAmount * 7;
-                item.AnnualAmount = item.DailyAmount * 365.25m;
-                break;
-        }
-    }
+
+			RecalculateAmountsBasedOnCalculationFrequency(item);
+		}
+	}
+
+	private decimal ConvertToDailyAmount(decimal amount, Frequency frequency)
+	{
+		return frequency switch
+		{
+			Frequency.Daily => amount,
+			Frequency.Weekly => amount / 7,
+			Frequency.Monthly => amount / 30.4375m,
+			Frequency.Quarterly => amount / 91.3125m,
+			Frequency.Annually => amount / 365.25m, // Includes leap year
+			_ => amount,
+		};
+	}
+
+	private void ChangeCalculationFrequency(BudgetItem item, string selectedFrequency)
+	{
+		if (Enum.TryParse(selectedFrequency, out CalculationFrequency frequency))
+		{
+			item.CalculationFrequency = frequency;
+			dynamicHeaderLabel = frequency.ToString();
+			RecalculateAmountsBasedOnCalculationFrequency(item);
+		}
+	}
+
+	private void ChangeGlobalCalculationFrequency(ChangeEventArgs e)
+	{
+
+		string selectedFrequency = e.Value.ToString();
+
+
+		if (Enum.TryParse(selectedFrequency, out CalculationFrequency frequency))
+		{
+
+			globalCalculationFrequency = frequency.ToString();
+
+			foreach (var item in budgetItems)
+			{
+				item.CalculationFrequency = frequency;
+			}
+			dynamicHeaderLabel = frequency.ToString();
+
+			CalculateAmounts();
+		}
+
+	}
+
+	private void RecalculateAmountsBasedOnCalculationFrequency(BudgetItem item)
+	{
+		switch (item.CalculationFrequency)
+		{
+			case CalculationFrequency.Daily:
+				item.DynamicAmount = item.DailyAmount;
+				item.AnnualAmount = item.DailyAmount * 365.25m;
+				break;
+			case CalculationFrequency.Weekly:
+				item.DynamicAmount = item.DailyAmount * 7;
+				item.AnnualAmount = (item.DailyAmount * 7) * 52.1786m;
+				break;
+			case CalculationFrequency.Monthly:
+				item.DynamicAmount = (item.DailyAmount * 30.4375m);
+				item.AnnualAmount = item.DailyAmount * 365.25m;
+				break;
+			case CalculationFrequency.Quarterly:
+				item.DynamicAmount = (item.DailyAmount * 91.3125m);
+				item.AnnualAmount = item.DailyAmount * 365.25m;
+				break;
+			case CalculationFrequency.Annually:
+				item.DynamicAmount = (item.DailyAmount * 365.25m);
+				item.AnnualAmount = item.DailyAmount * 365.25m;
+				break;
+			default:
+				item.DynamicAmount = item.DailyAmount * 7;
+				item.AnnualAmount = item.DailyAmount * 365.25m;
+				break;
+		}
+	}
 }
