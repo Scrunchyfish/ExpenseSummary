@@ -40,34 +40,26 @@
 
 	<h4>Budget Items</h4>
 	<table class="table table-striped table-bordered">
-		<thead>
+		<thead class="align-text-top">
 			<tr>
 				<th>Name</th>
 				<th>Per Period Amount</th>
 				<th>Frequency</th>
-				<th>Calculation Frequency</th>
+				<th>
+					Calculation Frequency
+					<span>
+						<select id="globalFrequency" class="form-select form-select-sm mt-2" @onchange="ChangeGlobalCalculationFrequency">
+							<option value="Daily">Daily</option>
+							<option value="Weekly">Weekly</option>
+							<option value="Monthly">Monthly</option>
+							<option value="Quarterly">Quarterly</option>
+							<option value="Annually">Annually</option>
+						</select>
+					</span>
+				</th>
 				<th>@dynamicHeaderLabel Amount</th>
 				<th>Annual Amount</th>
 				<th>Actions</th>
-			</tr>
-			<tr>
-				<th></th>
-				<th></th>
-				<th></th>
-				<th>
-				<td>
-						<select id="globalFrequency" class="form-select" @onchange="ChangeGlobalCalculationFrequency">
-					<option value="Daily">Daily</option>
-					<option value="Weekly">Weekly</option>
-					<option value="Monthly">Monthly</option>
-					<option value="Quarterly">Quarterly</option>
-					<option value="Annually">Annually</option>
-					</select>
-				</td>
-				</th>
-				<th></th>
-				<th></th>
-				<th></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -138,8 +130,9 @@
 		</div>
 	</div>
 	<div class="row justify-content-between">
-		<MudButton>Open File</MudButton>
-		<MudButton>Save File</MudButton>
+		<MudButton @onclick="SaveToFile">Save File</MudButton>
+		<input type="file" @ref="fileInput" style="display:none" @onchange="LoadFromFile" />
+		<MudButton @onclick="TriggerFileInput">Load from File</MudButton>
 	</div>
 
 </div>
@@ -149,6 +142,7 @@
 	private BudgetItem newItem = new();
 	private string dynamicHeaderLabel = "";
 	private string globalCalculationFrequency = "Weekly";
+	private ElementReference fileInput;
 
 	public class BudgetItem
 	{
@@ -183,13 +177,13 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		await LoadBudgetItems();
+		await LoadBudgetItemsLocal();
 		CalculateAmounts();
 	}
 
-	
 
-	private async Task LoadBudgetItems()
+
+	private async Task LoadBudgetItemsLocal()
 	{
 		var itemsJson = await JSRuntime.InvokeAsync<string>("localStorageManager.getItem", "budgetItems");
 		if (!string.IsNullOrEmpty(itemsJson))
@@ -198,10 +192,32 @@
 		}
 	}
 
-	private async Task SaveBudgetItems()
+	private async Task LoadFromFile()
+	{
+		var jsonData = await JSRuntime.InvokeAsync<string>("loadFromFile", fileInput);
+		if (!string.IsNullOrEmpty(jsonData))
+		{
+			budgetItems = JsonSerializer.Deserialize<List<BudgetItem>>(jsonData);
+			await SaveBudgetItemsLocal();
+		}
+	}
+
+	private async Task SaveBudgetItemsLocal()
 	{
 		var itemsJson = JsonSerializer.Serialize(budgetItems);
 		await JSRuntime.InvokeVoidAsync("localStorageManager.setItem", "budgetItems", itemsJson);
+	}
+
+	private async Task SaveToFile()
+	{
+		await LoadBudgetItemsLocal();
+		var budgetItemsJson = JsonSerializer.Serialize(budgetItems);
+		await JSRuntime.InvokeVoidAsync("FileSaveAs", "budgetItems.json", budgetItemsJson);
+	}
+
+	private void TriggerFileInput()
+	{
+		JSRuntime.InvokeVoidAsync("triggerFileInput", fileInput);
 	}
 
 	private void AddBudgetItem()
@@ -215,7 +231,7 @@
 				CalculationFrequency = CalculationFrequency.Daily
 			});
 		CalculateAmounts();
-		SaveBudgetItems();
+		SaveBudgetItemsLocal();
 		newItem = new BudgetItem();
 	}
 
@@ -223,7 +239,7 @@
 	{
 		budgetItems.Remove(item);
 		CalculateAmounts();
-		SaveBudgetItems();
+		SaveBudgetItemsLocal();
 	}
 
 	private void CalculateAmounts()
