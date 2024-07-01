@@ -251,7 +251,7 @@
 
 			item.DailyAmount = dailyAmount;
 			item.DynamicAmount = dailyAmount * 7;
-			item.AnnualAmount = dailyAmount * 365.25m;
+			item.AnnualAmount = dailyAmount * 365m;
 
 
 			RecalculateAmountsBasedOnCalculationFrequency(item);
@@ -266,7 +266,7 @@
 			Frequency.Weekly => amount / 7,
 			Frequency.Monthly => amount / 30.4375m,
 			Frequency.Quarterly => amount / 91.3125m,
-			Frequency.Annually => amount / 365.25m, // Includes leap year
+			Frequency.Annually => amount / 365m,
 			_ => amount,
 		};
 	}
@@ -309,27 +309,27 @@
 		{
 			case CalculationFrequency.Daily:
 				item.DynamicAmount = item.DailyAmount;
-				item.AnnualAmount = item.DailyAmount * 365.25m;
+				item.AnnualAmount = item.DailyAmount * 365m;
 				break;
 			case CalculationFrequency.Weekly:
 				item.DynamicAmount = item.DailyAmount * 7;
-				item.AnnualAmount = (item.DailyAmount * 7) * 52.1786m;
+				item.AnnualAmount = (item.DailyAmount * 7) * 52.1429m;
 				break;
 			case CalculationFrequency.Monthly:
 				item.DynamicAmount = (item.DailyAmount * 30.4375m);
-				item.AnnualAmount = item.DailyAmount * 365.25m;
+				item.AnnualAmount = item.DailyAmount * 365m;
 				break;
 			case CalculationFrequency.Quarterly:
 				item.DynamicAmount = (item.DailyAmount * 91.3125m);
-				item.AnnualAmount = item.DailyAmount * 365.25m;
+				item.AnnualAmount = item.DailyAmount * 365m;
 				break;
 			case CalculationFrequency.Annually:
-				item.DynamicAmount = (item.DailyAmount * 365.25m);
-				item.AnnualAmount = item.DailyAmount * 365.25m;
+				item.DynamicAmount = (item.DailyAmount * 365m);
+				item.AnnualAmount = item.DailyAmount * 365m;
 				break;
 			default:
 				item.DynamicAmount = item.DailyAmount * 7;
-				item.AnnualAmount = item.DailyAmount * 365.25m;
+				item.AnnualAmount = item.DailyAmount * 365m;
 				break;
 		}
 	}
