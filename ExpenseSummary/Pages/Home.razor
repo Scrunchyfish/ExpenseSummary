@@ -25,6 +25,7 @@
 				<select id="frequency" class="form-select" @bind="newItem.Frequency">
 					<option value="Daily">Daily</option>
 					<option value="Weekly">Weekly</option>
+					<option value="Fortnightly">Fortnightly</option>
 					<option value="Monthly">Monthly</option>
 					<option value="Quarterly">Quarterly</option>
 					<option value="Annually">Annually</option>
@@ -51,6 +52,7 @@
 						<select id="globalFrequency" class="form-select form-select-sm mt-2" @onchange="ChangeGlobalCalculationFrequency">
 							<option value="Daily">Daily</option>
 							<option value="Weekly">Weekly</option>
+							<option value="Fortnightly">Fortnightly</option>
 							<option value="Monthly">Monthly</option>
 							<option value="Quarterly">Quarterly</option>
 							<option value="Annually">Annually</option>
@@ -161,6 +163,7 @@
 	{
 		Daily,
 		Weekly,
+		Fortnightly,
 		Monthly,
 		Quarterly,
 		Annually
@@ -170,6 +173,7 @@
 	{
 		Daily,
 		Weekly,
+		Fortnightly,
 		Monthly,
 		Quarterly,
 		Annually
@@ -264,6 +268,7 @@
 		{
 			Frequency.Daily => amount,
 			Frequency.Weekly => amount / 7,
+			Frequency.Fortnightly => amount / 14,
 			Frequency.Monthly => amount / 30.4375m,
 			Frequency.Quarterly => amount / 91.3125m,
 			Frequency.Annually => amount / 365m,
@@ -314,6 +319,10 @@
 			case CalculationFrequency.Weekly:
 				item.DynamicAmount = item.DailyAmount * 7;
 				item.AnnualAmount = (item.DailyAmount * 7) * 52.1429m;
+				break;
+			case CalculationFrequency.Fortnightly:
+				item.DynamicAmount = item.DailyAmount * 14;
+				item.AnnualAmount = (item.DailyAmount * 14) * 26.0714m;
 				break;
 			case CalculationFrequency.Monthly:
 				item.DynamicAmount = (item.DailyAmount * 30.4375m);
