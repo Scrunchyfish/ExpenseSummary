@@ -68,30 +68,73 @@
 			@foreach (var item in budgetItems)
 			{
 				<tr>
-					<td>@item.Name</td>
-					<td>@item.PerPeriodAmount.ToString("C2", new CultureInfo("en-AU"))</td>
-					<td>@item.Frequency</td>
+					<td>
+						@if (item.IsEditing)
+						{
+							<input class="form-control" @bind="item.Name" />
+						}
+						else
+						{
+							@item.Name
+						}
+					</td>
+					<td>
+						@if (item.IsEditing)
+						{
+							<input class="form-control" type="number" @bind="item.PerPeriodAmount" />
+						}
+						else
+						{
+							@item.PerPeriodAmount.ToString("C2", new CultureInfo("en-AU"))
+						}
+					</td>
+					<td>
+						@if (item.IsEditing)
+						{
+							<select class="form-select" @bind="item.Frequency">
+								<option value="Daily">Daily</option>
+								<option value="Weekly">Weekly</option>
+								<option value="Fortnightly">Fortnightly</option>
+								<option value="Monthly">Monthly</option>
+								<option value="Quarterly">Quarterly</option>
+								<option value="Annually">Annually</option>
+							</select>
+						}
+						else
+						{
+							@item.Frequency
+						}
+					</td>
 					<td>
 						@item.CalculationFrequency
 
-						@* 
-						This created a bug that would allow each item to have its own CalculationFrequency which made the running
-						totals have inaccurate data. I found it quite cool though just out of scope. Prehaps a feature to build on later.
-						
-						<select @onchange="(e => ChangeCalculationFrequency(item, e.Value.ToString()))">
-							<option value="@CalculationFrequency.Daily">Daily</option>
-							<option value="@CalculationFrequency.Weekly">Weekly</option>
-							<option value="@CalculationFrequency.Monthly">Monthly</option>
-							<option value="@CalculationFrequency.Quarterly">Quarterly</option>
-							<option value="@CalculationFrequency.Annually">Annually</option>
-						</select>
-						 *@
+						@*
+					This created a bug that would allow each item to have its own CalculationFrequency which made the running
+					totals have inaccurate data. I found it quite cool though just out of scope. Prehaps a feature to build on later.
+
+					<select @onchange="(e => ChangeCalculationFrequency(item, e.Value.ToString()))">
+					<option value="@CalculationFrequency.Daily">Daily</option>
+					<option value="@CalculationFrequency.Weekly">Weekly</option>
+					<option value="@CalculationFrequency.Monthly">Monthly</option>
+					<option value="@CalculationFrequency.Quarterly">Quarterly</option>
+					<option value="@CalculationFrequency.Annually">Annually</option>
+					</select>
+					*@
 
 					</td>
 					<td>@item.DynamicAmount.ToString("C2", new CultureInfo("en-AU"))</td>
 					<td>@item.AnnualAmount.ToString("C2", new CultureInfo("en-AU"))</td>
 					<td>
-						<button class="btn btn-danger btn-sm" @onclick="(() => RemoveBudgetItem(item))">Remove</button>
+						@if (item.IsEditing)
+						{
+							<button class="btn btn-success btn-sm" @onclick="(() => SaveEdit(item))">Save</button>
+							<button class="btn btn-secondary btn-sm" @onclick="(() => CancelEdit(item))">Cancel</button>
+						}
+						else
+						{
+							<button class="btn btn-primary btn-sm" @onclick="(() => EditBudgetItem(item))">Edit</button>
+							<button class="btn btn-danger btn-sm" @onclick="(() => RemoveBudgetItem(item))">Remove</button>
+						}
 					</td>
 				</tr>
 			}
@@ -156,6 +199,7 @@
 		public decimal DailyAmount { get; set; }
 		public decimal DynamicAmount { get; set; }
 		public decimal AnnualAmount { get; set; }
+		public bool IsEditing { get; set; }
 
 	}
 
@@ -244,6 +288,23 @@
 		budgetItems.Remove(item);
 		CalculateAmounts();
 		SaveBudgetItemsLocal();
+	}
+
+	private void EditBudgetItem(BudgetItem item)
+	{
+		item.IsEditing = true;
+	}
+
+	private void SaveEdit(BudgetItem item)
+	{
+		item.IsEditing = false;
+		CalculateAmounts();
+		SaveBudgetItemsLocal();
+	}
+
+	private void CancelEdit(BudgetItem item)
+	{
+		item.IsEditing = false;
 	}
 
 	private void CalculateAmounts()
